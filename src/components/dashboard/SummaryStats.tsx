@@ -1,43 +1,30 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Activity, Zap, AlertTriangle } from 'lucide-react';
 
 interface SummaryStatsProps {
-  data: any[];
+  data: {
+    max_co_in: number;
+    avg_efficiency: number;
+    total_energy: number;
+    anomaly_count: number;
+  };
 }
 
 export const SummaryStats: React.FC<SummaryStatsProps> = ({ data }) => {
-  const calculateStats = () => {
-    if (!data.length) return {
-      maxCoIn: 0,
-      avgEfficiency: 0,
-      totalEnergy: 0,
-      anomalyCount: 0
-    };
-
-    const maxCoIn = Math.max(...data.map(d => d.co_in));
-    const avgEfficiency = data.reduce((sum, d) => sum + d.efficiency_actual, 0) / data.length;
-    const totalEnergy = data.reduce((sum, d) => sum + d.power, 0) / 1000; // Convert to watts
-    const anomalyCount = data.filter(d => d.anomaly_detected).length;
-
-    return { maxCoIn, avgEfficiency, totalEnergy, anomalyCount };
-  };
-
-  const stats = calculateStats();
-
   const statCards = [
     {
       title: 'Max CO Input Today',
-      value: stats.maxCoIn.toFixed(1),
+      value: data.max_co_in.toFixed(1),
       unit: 'ppm',
       icon: TrendingUp,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-50 dark:bg-red-900/20'
     },
     {
-      title: 'Avg Efficiency',
-      value: stats.avgEfficiency.toFixed(1),
+      title: 'Avg Efficiency Today',
+      value: data.avg_efficiency.toFixed(1),
       unit: '%',
       icon: Activity,
       color: 'text-green-600 dark:text-green-400',
@@ -45,7 +32,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ data }) => {
     },
     {
       title: 'Total Energy Generated',
-      value: stats.totalEnergy.toFixed(2),
+      value: data.total_energy.toFixed(2),
       unit: 'W',
       icon: Zap,
       color: 'text-yellow-600 dark:text-yellow-400',
@@ -53,7 +40,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ data }) => {
     },
     {
       title: 'Anomalies Detected',
-      value: stats.anomalyCount.toString(),
+      value: data.anomaly_count.toString(),
       unit: 'today',
       icon: AlertTriangle,
       color: 'text-orange-600 dark:text-orange-400',
@@ -64,7 +51,7 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ data }) => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-        Summary Statistics
+        Daily Summary
       </h3>
       {statCards.map((stat, index) => (
         <Card key={index} className="transition-all duration-300 hover:shadow-lg animate-fade-in">

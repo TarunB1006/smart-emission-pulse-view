@@ -7,6 +7,7 @@ import { RealtimeChart } from '@/components/dashboard/RealtimeChart';
 import { SummaryStats } from '@/components/dashboard/SummaryStats';
 import { ServiceTimeline } from '@/components/dashboard/ServiceTimeline';
 import { ExportPanel } from '@/components/dashboard/ExportPanel';
+import { SystemHealth } from '@/components/dashboard/SystemHealth';
 import { ThemeProvider } from '@/components/dashboard/ThemeProvider';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,6 +25,20 @@ interface SensorData {
   recommendation: string;
 }
 
+interface DailyStats {
+  max_co_in: number;
+  avg_efficiency: number;
+  total_energy: number;
+  anomaly_count: number;
+}
+
+interface SystemHealthData {
+  health_score: number;
+  status: string;
+  avg_efficiency: number;
+  anomaly_ratio: number;
+}
+
 const Index = () => {
   const [currentData, setCurrentData] = useState<SensorData>({
     timestamp: new Date().toISOString(),
@@ -39,9 +54,60 @@ const Index = () => {
   });
   
   const [historicalData, setHistoricalData] = useState<SensorData[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStats>({
+    max_co_in: 0,
+    avg_efficiency: 0,
+    total_energy: 0,
+    anomaly_count: 0
+  });
+  const [systemHealth, setSystemHealth] = useState<SystemHealthData>({
+    health_score: 0,
+    status: 'no_data',
+    avg_efficiency: 0,
+    anomaly_ratio: 0
+  });
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const { toast } = useToast();
+
+  // Fetch daily stats
+  const fetchDailyStats = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/stats/daily');
+      const data = await response.json();
+      if (!data.error) {
+        setDailyStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching daily stats:', error);
+    }
+  };
+
+  // Fetch system health
+  const fetchSystemHealth = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/system/health');
+      const data = await response.json();
+      if (!data.error) {
+        setSystemHealth(data);
+      }
+    } catch (error) {
+      console.error('Error fetching system health:', error);
+    }
+  };
+
+  // Fetch historical data
+  const fetchHistoricalData = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/history');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setHistoricalData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching historical data:', error);
+    }
+  };
 
   useEffect(() => {
     // Connect to your Flask backend
@@ -79,6 +145,10 @@ const Index = () => {
         return updated;
       });
 
+      // Refresh stats when new data arrives
+      fetchDailyStats();
+      fetchSystemHealth();
+
       // Show anomaly toast if detected
       if (data.anomaly) {
         toast({
@@ -90,22 +160,32 @@ const Index = () => {
     });
 
     // Fetch initial data
-    fetch('http://localhost:5000/data')
-      .then(response => response.json())
-      .then(data => {
+    const fetchInitialData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/data');
+        const data = await response.json();
         if (!data.error) {
           setCurrentData(data);
           setLastUpdated(new Date(data.timestamp));
         }
-      })
-      .catch(error => {
+        
+        // Fetch all initial data
+        await Promise.all([
+          fetchDailyStats(),
+          fetchSystemHealth(),
+          fetchHistoricalData()
+        ]);
+      } catch (error) {
         console.error('Error fetching initial data:', error);
         toast({
           title: "❌ Connection Error",
           description: "Could not connect to the backend. Make sure it's running on port 5000.",
           variant: "destructive",
         });
-      });
+      }
+    };
+
+    fetchInitialData();
 
     return () => {
       socket.disconnect();
@@ -141,13 +221,14 @@ const Index = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main metrics and chart */}
             <div className="lg:col-span-2 space-y-6">
+              <SystemHealth data={systemHealth} />
               <MetricsGrid data={transformedCurrentData} recommendation={currentData.recommendation} />
               <RealtimeChart data={transformedHistoricalData} />
             </div>
             
             {/* Sidebar with stats and timeline */}
             <div className="space-y-6">
-              <SummaryStats data={transformedHistoricalData} />
+              <SummaryStats data={dailyStats} />
               <ServiceTimeline />
               <ExportPanel />
             </div>
