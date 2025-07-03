@@ -17,19 +17,13 @@ interface MetricsData {
 
 interface MetricsGridProps {
   data: MetricsData;
+  recommendation?: string;
 }
 
-export const MetricsGrid: React.FC<MetricsGridProps> = ({ data }) => {
+export const MetricsGrid: React.FC<MetricsGridProps> = ({ data, recommendation = "System operating normally" }) => {
   const getStatusColor = (value: number, threshold: number, reverse = false) => {
     const isGood = reverse ? value < threshold : value > threshold;
     return isGood ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
-  };
-
-  const getRecommendation = () => {
-    if (data.anomaly_detected) return "Check system immediately";
-    if (data.co_in > 100) return "Increase filtration rate";
-    if (data.efficiency_actual < 85) return "Schedule maintenance";
-    return "System operating normally";
   };
 
   const metrics = [
@@ -106,7 +100,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ data }) => {
         ))}
       </div>
 
-      {/* Power and Anomaly Cards */}
+      {/* Power and System Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="transition-all duration-300 hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -145,7 +139,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ data }) => {
                 {data.anomaly_detected ? "Anomaly Detected" : "Normal Operation"}
               </Badge>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {getRecommendation()}
+                {recommendation}
               </p>
             </div>
           </CardContent>

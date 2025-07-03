@@ -1,14 +1,15 @@
 
 import React from 'react';
 import { useTheme } from './ThemeProvider';
-import { Activity, Sun, Moon } from 'lucide-react';
+import { Activity, Sun, Moon, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   lastUpdated: Date;
+  connectionStatus?: 'connecting' | 'connected' | 'disconnected';
 }
 
-export const Header: React.FC<HeaderProps> = ({ lastUpdated }) => {
+export const Header: React.FC<HeaderProps> = ({ lastUpdated, connectionStatus = 'connected' }) => {
   const { theme, toggleTheme } = useTheme();
 
   const formatTime = (date: Date) => {
@@ -18,6 +19,32 @@ export const Header: React.FC<HeaderProps> = ({ lastUpdated }) => {
       minute: '2-digit',
       second: '2-digit'
     });
+  };
+
+  const getConnectionIndicator = () => {
+    switch (connectionStatus) {
+      case 'connecting':
+        return (
+          <div className="flex items-center space-x-2 text-sm text-yellow-600 dark:text-yellow-400">
+            <Loader2 className="w-2 h-2 animate-spin" />
+            <span>Connecting...</span>
+          </div>
+        );
+      case 'connected':
+        return (
+          <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Live • {formatTime(lastUpdated)}</span>
+          </div>
+        );
+      case 'disconnected':
+        return (
+          <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
+            <WifiOff className="w-2 h-2" />
+            <span>Disconnected</span>
+          </div>
+        );
+    }
   };
 
   return (
@@ -38,10 +65,7 @@ export const Header: React.FC<HeaderProps> = ({ lastUpdated }) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span>Last updated: {formatTime(lastUpdated)}</span>
-          </div>
+          {getConnectionIndicator()}
           
           <Button
             variant="outline"
