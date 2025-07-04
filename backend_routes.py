@@ -1,6 +1,60 @@
 
 # Add these routes to your existing Flask backend
 
+import serial
+import json
+import sqlite3
+from datetime import datetime
+from flask import Flask, jsonify
+from flask_cors import CORS
+from flask_socketio import SocketIO
+
+SERIAL_PORT = 'COM21'  # 👈 Replace with your COM port if you're on Windows (e.g., 'COM3')
+BAUD_RATE = 9600
+
+print(f"Connecting to serial port {SERIAL_PORT} at {BAUD_RATE} baud...")
+ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+print("Serial connection established.\n")
+
+# Flask + SocketIO
+app = Flask(__name__)
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# SQLite setup
+print("Connecting to SQLite database: sensor_data.db")
+conn = sqlite3.connect('sensor_data.db', check_same_thread=False)
+cursor = conn.cursor()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS readings (
+    timestamp TEXT,
+    co_in REAL,
+    co_out REAL,
+    efficiency REAL,
+    voltage REAL,
+    current REAL,
+    power REAL
+)
+''')
+conn.commit()
+print("Database setup completed.\n")
+
+@app.route("/data")
+def latest_data():
+    cursor.execute("SELECT * FROM readings ORDER BY timestamp DESC LIMIT 1")
+    row = cursor.fetchone()
+    if row:
+        return jsonify({
+            "timestamp": row[0],
+            "co_in": row[1],
+            "co_out": row[2],
+            "efficiency": row[3],
+            "voltage": row[4],
+            "current": row[5],
+            "power": row[6]
+        })
+    return jsonify({"error": "No data"})
+
 @app.route("/stats/daily")
 def get_daily_stats():
     """Get daily statistics from the database"""
@@ -75,7 +129,7 @@ def export_csv():
         rows = cursor.fetchall()
         
         # Create CSV content
-        csv_content = "timestamp,co_in,co_out,efficiency,predicted_eff,voltage,current,power,anomaly,recommendation\n"
+        csv_content = "timestamp,co_in,co_out,efficiency,voltage,current\n"
         for row in rows:
             csv_content += ",".join(str(x) for x in row) + "\n"
         
@@ -131,3 +185,58 @@ def get_system_health():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+def read_serial_data():
+    print("🟢 Started listening to serial data from Pico...\n")
+    while True:
+        try:
+            line = ser.readline().decode('utf-8').strip()
+            if not line or not line.startswith("{"):
+                continue
+
+            print("📥 Raw JSON line from Pico:", line)
+            data = json.loads(line)
+
+            co_in = data.get("CO_IN", 0)
+            co_out = data.get("CO_OUT", 0)
+            voltage = data.get("V_bus", 0)
+            current = data.get("current", 0)
+            power = data.get("power", 0)
+            timestamp = datetime.now().isoformat()
+
+            efficiency = ((co_in - co_out) / co_in * 100) if co_in > 0 else 0
+            print(f"✅ Parsed: CO_IN={co_in}, CO_OUT={co_out}, Efficiency={efficiency:.2f}%")
+
+            # Save to DB
+            cursor.execute("INSERT INTO readings VALUES (?, ?, ?, ?, ?, ?, ?)",
+                           (timestamp, co_in, co_out, efficiency, voltage, current, power))
+            conn.commit()
+            print("💾 Saved to database.")
+
+            # Emit to dashboard
+            socketio.emit("sensor_data", {
+                "timestamp": timestamp,
+                "co_in": co_in,
+                "co_out": co_out,
+                "efficiency": efficiency,
+                "voltage": voltage,
+                "current": current,
+                "power": power
+            })
+            print("📡 Sent to dashboard via WebSocket.\n")
+
+        except Exception as e:
+            print("❌ Error parsing or processing serial data:", e)
+
+@socketio.on("connect")
+def on_connect():
+    print("🖥 Web dashboard connected to server.\n")
+
+if __name__ == "__main__":
+    import threading
+    t = threading.Thread(target=read_serial_data)
+    t.daemon = True
+    t.start()
+    print("🚀 Flask + SocketIO server started on http://localhost:5000")
+    socketio.run(app, port=5000)

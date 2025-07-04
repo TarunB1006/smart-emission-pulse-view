@@ -73,7 +73,7 @@ const Index = () => {
   // Fetch daily stats
   const fetchDailyStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/stats/daily');
+      const response = await fetch('http://localhost:5001/stats/daily');
       const data = await response.json();
       if (!data.error) {
         setDailyStats(data);
@@ -86,7 +86,7 @@ const Index = () => {
   // Fetch system health
   const fetchSystemHealth = async () => {
     try {
-      const response = await fetch('http://localhost:5000/system/health');
+      const response = await fetch('http://localhost:5001/system/health');
       const data = await response.json();
       if (!data.error) {
         setSystemHealth(data);
@@ -99,7 +99,7 @@ const Index = () => {
   // Fetch historical data
   const fetchHistoricalData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/history');
+      const response = await fetch('http://localhost:5001/history');
       const data = await response.json();
       if (Array.isArray(data)) {
         setHistoricalData(data);
@@ -111,7 +111,7 @@ const Index = () => {
 
   useEffect(() => {
     // Connect to your Flask backend
-    const socket: Socket = io('http://localhost:5000');
+    const socket: Socket = io('http://localhost:5001');
 
     socket.on('connect', () => {
       console.log('✅ Connected to backend');
@@ -162,7 +162,7 @@ const Index = () => {
     // Fetch initial data
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/data');
+        const response = await fetch('http://localhost:5001/data');
         const data = await response.json();
         if (!data.error) {
           setCurrentData(data);

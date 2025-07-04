@@ -14,7 +14,7 @@ export const ExportPanel: React.FC = () => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const response = await fetch('http://localhost:5000/export/csv');
+      const response = await fetch('http://localhost:5001/export/csv');
       if (response.ok) {
         const csvData = await response.text();
         
