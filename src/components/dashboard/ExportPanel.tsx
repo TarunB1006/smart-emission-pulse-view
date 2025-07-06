@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileText, Calendar } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const ExportPanel: React.FC = () => {
@@ -49,20 +49,20 @@ export const ExportPanel: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <FileText className="h-5 w-5" />
+    <Card className="h-fit">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-base">
+          <FileText className="h-4 w-4" />
           <span>Data Export</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
             Time Window
           </label>
           <Select value={timeWindow} onValueChange={setTimeWindow}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8">
               <SelectValue placeholder="Select time window" />
             </SelectTrigger>
             <SelectContent>
@@ -77,31 +77,22 @@ export const ExportPanel: React.FC = () => {
         <Button 
           onClick={handleExport}
           disabled={isExporting}
-          className="w-full"
+          className="w-full h-8"
           variant="default"
+          size="sm"
         >
           {isExporting ? (
             <>
-              <Download className="mr-2 h-4 w-4 animate-spin" />
+              <Download className="mr-2 h-3 w-3 animate-spin" />
               Exporting...
             </>
           ) : (
             <>
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-3 w-3" />
               Export CSV
             </>
           )}
         </Button>
-
-        <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
-          <div className="flex items-center space-x-1">
-            <Calendar className="h-3 w-3" />
-            <span>Includes all sensor readings</span>
-          </div>
-          <div>• Timestamp, CO levels, efficiency data</div>
-          <div>• Voltage, current, power measurements</div>
-          <div>• Anomaly flags and recommendations</div>
-        </div>
       </CardContent>
     </Card>
   );

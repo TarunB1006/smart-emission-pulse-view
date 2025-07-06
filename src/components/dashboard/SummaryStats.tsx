@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, Activity, Zap, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Activity, AlertTriangle } from 'lucide-react';
 
 interface SummaryStatsProps {
   data: {
@@ -29,14 +29,6 @@ export const SummaryStats: React.FC<SummaryStatsProps> = ({ data }) => {
       icon: Activity,
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-50 dark:bg-green-900/20'
-    },
-    {
-      title: 'Total Energy Generated',
-      value: data.total_energy.toFixed(2),
-      unit: 'W',
-      icon: Zap,
-      color: 'text-yellow-600 dark:text-yellow-400',
-      bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
     },
     {
       title: 'Anomalies Detected',

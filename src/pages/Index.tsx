@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Header } from '@/components/dashboard/Header';
@@ -226,8 +227,8 @@ const Index = () => {
             {/* Sidebar with stats and timeline */}
             <div className="space-y-6">
               <SummaryStats data={dailyStats} />
-              <ServiceTimeline />
               <ExportPanel />
+              <ServiceTimeline />
             </div>
           </div>
         </div>
