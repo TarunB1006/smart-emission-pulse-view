@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Header } from '@/components/dashboard/Header';
@@ -7,7 +6,6 @@ import { RealtimeChart } from '@/components/dashboard/RealtimeChart';
 import { SummaryStats } from '@/components/dashboard/SummaryStats';
 import { ServiceTimeline } from '@/components/dashboard/ServiceTimeline';
 import { ExportPanel } from '@/components/dashboard/ExportPanel';
-import { SystemHealth } from '@/components/dashboard/SystemHealth';
 import { ThemeProvider } from '@/components/dashboard/ThemeProvider';
 import { useToast } from '@/hooks/use-toast';
 
@@ -221,9 +219,8 @@ const Index = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main metrics and chart */}
             <div className="lg:col-span-2 space-y-6">
-              <SystemHealth data={systemHealth} />
-              <MetricsGrid data={transformedCurrentData} recommendation={currentData.recommendation} />
               <RealtimeChart data={transformedHistoricalData} />
+              <MetricsGrid data={transformedCurrentData} recommendation={currentData.recommendation} />
             </div>
             
             {/* Sidebar with stats and timeline */}
