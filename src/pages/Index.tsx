@@ -4,9 +4,13 @@ import { io, Socket } from 'socket.io-client';
 import { Header } from '@/components/dashboard/Header';
 import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
 import { RealtimeChart } from '@/components/dashboard/RealtimeChart';
-import { SummaryStats } from '@/components/dashboard/SummaryStats';
 import { ServiceTimeline } from '@/components/dashboard/ServiceTimeline';
+<<<<<<< HEAD
 import { ExportPanel } from '@/components/dashboard/ExportPanel';
+=======
+import { ExportPanel } from '@/components/dashboard/ExportPanel';  // Import SystemHealth if you want to display it
+import { SummaryStats } from '@/components/dashboard/SummaryStats';
+>>>>>>> Final changes to UI done
 import { ThemeProvider } from '@/components/dashboard/ThemeProvider';
 import { useToast } from '@/hooks/use-toast';
 
@@ -211,7 +215,7 @@ const Index = () => {
     timestamp: new Date(item.timestamp)
   }));
 
-  return (
+    return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
         <div className="container mx-auto px-4 py-6 space-y-6">

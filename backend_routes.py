@@ -239,4 +239,4 @@ if __name__ == "__main__":
     t.daemon = True
     t.start()
     print("🚀 Flask + SocketIO server started on http://localhost:5000")
-    socketio.run(app, port=5000)
+    socketio.run(app, port=5001)
