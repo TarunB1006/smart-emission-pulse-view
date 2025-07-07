@@ -49,9 +49,12 @@ def latest_data():
             "co_in": row[1],
             "co_out": row[2],
             "efficiency": row[3],
+            "predicted_efficiency": row[3] + 5,  # Mock predicted value
             "voltage": row[4],
             "current": row[5],
-            "power": row[6]
+            "power": row[6],
+            "anomaly": False,
+            "recommendation": "System operating normally"
         })
     return jsonify({"error": "No data"})
 
@@ -129,7 +132,7 @@ def export_csv():
         rows = cursor.fetchall()
         
         # Create CSV content
-        csv_content = "timestamp,co_in,co_out,efficiency,voltage,current\n"
+        csv_content = "timestamp,co_in,co_out,efficiency,voltage,current,power\n"
         for row in rows:
             csv_content += ",".join(str(x) for x in row) + "\n"
         
@@ -139,53 +142,6 @@ def export_csv():
         }
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route("/system/health")
-def get_system_health():
-    """Get overall system health score"""
-    try:
-        # Get last 10 readings for health calculation
-        cursor.execute("""
-            SELECT efficiency, anomaly, power 
-            FROM readings 
-            ORDER BY timestamp DESC 
-            LIMIT 10
-        """)
-        rows = cursor.fetchall()
-        
-        if not rows:
-            return jsonify({"health_score": 0, "status": "no_data"})
-        
-        # Calculate health score based on efficiency and anomalies
-        avg_efficiency = sum(row[0] for row in rows) / len(rows)
-        anomaly_ratio = sum(row[1] for row in rows) / len(rows)
-        avg_power = sum(row[2] for row in rows) / len(rows)
-        
-        # Health score calculation (0-100)
-        health_score = max(0, min(100, 
-            (avg_efficiency * 0.6) + 
-            ((1 - anomaly_ratio) * 30) + 
-            (min(avg_power / 100, 1) * 10)
-        ))
-        
-        if health_score >= 80:
-            status = "excellent"
-        elif health_score >= 60:
-            status = "good"
-        elif health_score >= 40:
-            status = "warning"
-        else:
-            status = "critical"
-        
-        return jsonify({
-            "health_score": round(health_score, 1),
-            "status": status,
-            "avg_efficiency": round(avg_efficiency, 1),
-            "anomaly_ratio": round(anomaly_ratio * 100, 1)
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 
 def read_serial_data():
     print("🟢 Started listening to serial data from Pico...\n")
@@ -220,9 +176,12 @@ def read_serial_data():
                 "co_in": co_in,
                 "co_out": co_out,
                 "efficiency": efficiency,
+                "predicted_efficiency": efficiency + 5,
                 "voltage": voltage,
                 "current": current,
-                "power": power
+                "power": power,
+                "anomaly": co_in > 100,  # Simple anomaly detection
+                "recommendation": "High CO levels detected" if co_in > 100 else "System operating normally"
             })
             print("📡 Sent to dashboard via WebSocket.\n")
 
@@ -238,5 +197,5 @@ if __name__ == "__main__":
     t = threading.Thread(target=read_serial_data)
     t.daemon = True
     t.start()
-    print("🚀 Flask + SocketIO server started on http://localhost:5000")
+    print("🚀 Flask + SocketIO server started on http://localhost:5001")
     socketio.run(app, port=5001)
