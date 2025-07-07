@@ -5,6 +5,7 @@ import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
 import { RealtimeChart } from '@/components/dashboard/RealtimeChart';
 import { ServiceTimeline } from '@/components/dashboard/ServiceTimeline';
 import { SummaryStats } from '@/components/dashboard/SummaryStats';
+import { ExportPanel } from '@/components/dashboard/ExportPanel';
 import { ThemeProvider } from '@/components/dashboard/ThemeProvider';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,6 +26,7 @@ interface SensorData {
 interface DailyStats {
   max_co_in: number;
   avg_efficiency: number;
+  total_energy: number;
   anomaly_count: number;
 }
 
@@ -48,6 +50,7 @@ const Index = () => {
   const [dailyStats, setDailyStats] = useState<DailyStats>({
     max_co_in: 0,
     avg_efficiency: 0,
+    total_energy: 0,
     anomaly_count: 0
   });
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -285,9 +288,10 @@ const Index = () => {
               <MetricsGrid data={transformedCurrentData} recommendation={currentData.recommendation} />
             </div>
             
-            {/* Sidebar with stats and timeline */}
+            {/* Sidebar with stats, export, and timeline */}
             <div className="space-y-6">
               <SummaryStats data={dailyStats} />
+              <ExportPanel />
               <ServiceTimeline />
             </div>
           </div>
