@@ -1,12 +1,12 @@
-# 🚗 IoT Dashboard for CO Reduction & System Monitoring
+# IoT Dashboard for CO Reduction & System Monitoring
 
-## 📌 Overview
+##  Overview
 
 This project is a real-time IoT monitoring dashboard built to measure and enhance carbon monoxide (CO) reduction in vehicle exhaust systems using a CuO-coated mesh catalyst. It features live data visualization, interactive analytics, and a clean, responsive interface for monitoring key system parameters.
 
 ---
 
-## ⚙️ Key Features
+## Key Features
 
 - 📈 **Live Sensor Data Monitoring**  
   Visualizes CO concentration (in/out), voltage, current, power, and thermal gradients in real time.
@@ -28,7 +28,7 @@ This project is a real-time IoT monitoring dashboard built to measure and enhanc
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 | Frontend       | Backend        | Styling          |
 |----------------|----------------|------------------|
@@ -38,7 +38,7 @@ This project is a real-time IoT monitoring dashboard built to measure and enhanc
 
 ---
 
-## 🔧 Getting Started
+## Getting Started
 
 ### Prerequisites
 
