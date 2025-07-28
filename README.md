@@ -50,8 +50,8 @@ This project is a real-time IoT monitoring dashboard built to measure and enhanc
 
 ```bash
 # Clone the repository
-git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
+git clone https://github.com/TarunB1006/smart-emission-pulse-view.git
+cd smart-emission-pulse-view
 
 # Install frontend dependencies
 npm install
